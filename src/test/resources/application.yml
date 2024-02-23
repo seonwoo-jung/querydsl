@@ -1,17 +1,31 @@
+server:
+  port: 7070
+
 spring:
   profiles:
-    active: test
+    active: TEST
+
   datasource:
-    url: jdbc:h2:tcp://localhost/~/test
-    username: sa
-    password:
-    driver-class-name: org.h2.Driver
+    url: jdbc:mysql://localhost:3306/study
+    username: root
+    password: tiger
+    driver-class-name: com.mysql.cj.jdbc.Driver
 
   jpa:
     hibernate:
       ddl-auto: create
+
+    properties:
+      hibernate:
+      auto_quote_keyword: false
+      globally_quoted_identifiers: false
     open-in-view: false
 
 logging:
   level:
     p6spy: debug
+
+jwt:
+  secret: c2Vvbndvb19qdW5nDQo=c2Vvbndvb19qdW5nDQo=c2Vvbndvb19qdW5nDQo=
+  access-token-valid-seconds: 7200 # 2 hour
+  refresh-token-valid-seconds: 604800 # 7 day

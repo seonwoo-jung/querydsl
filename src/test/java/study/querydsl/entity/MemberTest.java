@@ -1,17 +1,35 @@
 package study.querydsl.entity;
 
+import static study.querydsl.entity.QMember.member;
+
+import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.jpa.impl.JPAQueryFactory;
 import jakarta.persistence.EntityManager;
 import java.util.List;
+import java.util.Objects;
+import lombok.extern.slf4j.Slf4j;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.platform.commons.util.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 
 @SpringBootTest
 @Transactional
+@Slf4j
 class MemberTest {
 
-	@Autowired EntityManager em;
+	@Autowired
+	private EntityManager em;
+
+	private JPAQueryFactory queryFactory;
+
+	@BeforeEach
+	void setup() {
+		queryFactory = new JPAQueryFactory(em);
+	}
 
 	@Test
 	void testEntity() {
@@ -41,5 +59,38 @@ class MemberTest {
 			System.out.println("member = " + member);
 			System.out.println("member.getTeam() = " + member.getTeam());
 		}
+	}
+
+	@Test
+	@DisplayName("조건절 동적쿼리 작성")
+	void queryDSL() {
+		Member entity = Member.builder()
+			.username("seonwoo_jung")
+			.age(27)
+			.build();
+		em.persist(entity);
+
+		List<Member> members = queryFactory.select(member)
+			.from(member)
+			.where(eqUsername(null), eqAge(null))
+			.fetch();
+
+		for (Member member : members) {
+			log.info("member => {}", member);
+		}
+	}
+
+	private BooleanExpression eqAge(Integer age) {
+		if (Objects.isNull(age)) {
+			return null;
+		}
+		return member.age.eq(age);
+	}
+
+	private BooleanExpression eqUsername(String username) {
+		if (StringUtils.isBlank(username)) {
+			return null;
+		}
+		return member.username.eq(username);
 	}
 }
